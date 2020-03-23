@@ -1,0 +1,6 @@
+.env
+/icons
+/venv
+stopwatch.desktop
+.idea
+/__pycache__
