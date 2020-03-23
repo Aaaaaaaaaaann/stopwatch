@@ -68,7 +68,8 @@ class Stopwatch:
         time_parts = [int(i) for i in str(self.working_time).split(':')]
         seconds = time_parts[0] * 3600 + time_parts[1] * 60 + time_parts[2]
         seconds += 1
-        self.working_time = datetime.datetime.strptime(f'{seconds // 60 // 60}:{seconds // 60 % 60}:{seconds % 60}', '%H:%M:%S').strftime('%H:%M:%S')
+        self.working_time = datetime.datetime.strptime(f'{seconds // 60 // 60}:{seconds // 60 % 60}:' +
+                                                       f'{seconds % 60}', '%H:%M:%S').strftime('%H:%M:%S')
         self.time_label.configure(text=f'{self.working_time}')
 
     def pause_event(self):
@@ -90,7 +91,10 @@ class Stopwatch:
         if 'pause' in str(self.last_called_func):
             self.pauses += 1
         if self.pause_duration:
-            self.pause_duration = datetime.datetime.strptime(f'{self.pause_duration // 60 // 60}:{self.pause_duration // 60 % 60}:{self.pause_duration % 60}', '%H:%M:%S').strftime('%H:%M:%S')
+            self.pause_duration = datetime.datetime.strptime(f'{self.pause_duration // 60 // 60}:' +
+                                                             f'{self.pause_duration // 60 % 60}:' +
+                                                             f'{self.pause_duration % 60}',
+                                                             '%H:%M:%S').strftime('%H:%M:%S')
         self.task = self.task_entry.get('1.0', tk.END)
         self.day_of_week = days_of_week[datetime.date.today().weekday()]
         self.pause_button.configure(state=tk.DISABLED)
@@ -100,11 +104,14 @@ class Stopwatch:
         self.__init__(master=None)
 
     def add_entry_to_db(self):
-        connection = psycopg2.connect(dbname=os.getenv('DBNAME'), user=os.getenv('NAME'), host=os.getenv('HOST'), password=os.getenv('PASSWORD'))
+        connection = psycopg2.connect(dbname=os.getenv('DBNAME'), user=os.getenv('NAME'), host=os.getenv('HOST'),
+                                      password=os.getenv('PASSWORD'))
         cursor = connection.cursor()
-        cursor.execute('''INSERT INTO tasks (date, task, working_time, start_time, stop_time, pauses, pause_duration, day_of_week)
+        cursor.execute('''INSERT INTO tasks (date, task, working_time, start_time, stop_time, pauses, pause_duration,
+                       day_of_week)
                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s);''',
-                       (self.date, self.task, self.working_time, self.start_time, self.stop_time, self.pauses, self.pause_duration, self.day_of_week))
+                       (self.date, self.task, self.working_time, self.start_time, self.stop_time, self.pauses,
+                        self.pause_duration, self.day_of_week))
         connection.commit()
         cursor.close()
         connection.close()
